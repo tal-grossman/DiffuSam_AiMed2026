@@ -1,0 +1,10 @@
+# LaTeX build
+*.aux
+*.log
+*.out
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+
+# Optional: uncomment to ignore PDF (if you build locally only)
+# *.pdf
