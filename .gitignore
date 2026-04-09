@@ -6,5 +6,9 @@
 *.fls
 *.synctex.gz
 
+build/*.pdf
+
+
+
 # Optional: uncomment to ignore PDF (if you build locally only)
 # *.pdf
