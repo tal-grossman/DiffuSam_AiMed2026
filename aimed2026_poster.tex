@@ -17,6 +17,8 @@
 \usepackage{caption}
 \usepackage{xcolor}
 \usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{hyperref}
 \hypersetup{colorlinks=false}
 
@@ -121,12 +123,12 @@
   {\color{white}\small
   $^{\dagger}$Equal contribution \hspace{1.0em}
   $^{1}$School of Electrical Engineering, Tel Aviv University, Israel \hspace{1.0em}
-  $^{2}$Dept.\ of Biomedical Engineering, Tel Aviv University, Israel}
+  $^{2}$School of Biomedical Engineering, Tel Aviv University, Israel}
 
   \vspace{4pt}
 
   {\color{white}\small
-  \texttt{talgrossman22@gmail.com}}
+  \texttt{talgrossman22@gmail.com, hayit@eng.tau.ac.il}}
   \end{center}
 \end{minipage}\hfill
 \begin{minipage}[c][8.9cm][c]{0.14\textwidth}
@@ -135,17 +137,8 @@
   % \includegraphics[width=0.96\linewidth]{placeholder_logo.png}
 \end{minipage}
 
-\vspace{2.5cm}
-
-% ── Keywords bar ───────────────────────────────────────────────
-\colorbox{LightGray}{\parbox{\dimexpr\textwidth-2\fboxsep}{%
-\vspace{4pt}
-\textbf{Keywords:}\enspace
-Medical image segmentation,\enspace diffusion models,\enspace SAM2,\enspace prompt-free segmentation,\enspace domain adaptation
-\vspace{4pt}
-}}
-
-\vspace{0.2cm}
+% \vspace{1.35cm}
+\vspace{2cm}
 
 % ================================================================
 %  TWO-COLUMN BODY
@@ -157,7 +150,7 @@ Medical image segmentation,\enspace diffusion models,\enspace SAM2,\enspace prom
 \sectionbar{Key Information}
 
 \textbf{\color{SectionBlue}Research question}\\
-Can a lightweight diffusion prior over frozen SAM2 features enable accurate, prompt-free medical image segmentation without full fine-tuning or expert-provided prompts?
+Can a lightweight diffusion prior over frozen SAM2 features enable accurate prompt-free medical image segmentation in both few-shot learning and source-free unsupervised domain adaptation, without full fine-tuning or expert-provided prompts?
 
 \vspace{4pt}
 \textbf{\color{SectionBlue}Findings}\\
@@ -167,17 +160,18 @@ DiffuSAM achieves \textbf{87.2\%} average Dice in few-shot CT segmentation and \
 \textbf{\color{SectionBlue}Meaning}\\
 Diffusion-based memory generation offers a practical, lightweight path for adapting vision foundation models to medical imaging without prompts or expensive fine-tuning, facilitating clinical workflow integration.
 
+\vspace{0.5cm}
 \sectionbar{Introduction}
 
 Medical image segmentation is vital for clinical diagnosis and treatment planning.
 Foundation models such as SAM\,[1] and SAM2\,[2] achieve strong zero-shot performance on natural images but struggle with medical data due to domain differences in texture, contrast, and anatomy.
 Their reliance on expert-provided prompts further limits clinical deployment.
-Prior adaptations such as MedSAM\,[3] require costly fine-tuning and typically still depend on prompts.
+Prior adaptations such as MedSAM\,[3] require costly fine-tuning and typically still depend on prompts. This challenge is especially acute in source-free unsupervised domain adaptation, where models must adapt across modalities without access to source-domain images.
 
 \vspace{4pt}
-\textbf{We propose DiffuSAM}, a diffusion-based framework for \textbf{prompt-free} medical image segmentation that keeps the SAM2 backbone \textbf{entirely frozen}.
+\textbf{We propose DiffuSAM}, a diffusion-based framework for \textbf{prompt-free} medical image segmentation and \textbf{source-free domain adaptation} that keeps the SAM2 backbone \textbf{entirely frozen}.
 
-\vspace{0.10cm}
+\vspace{0.5cm}
 \sectionbar{Material and Methods}
 
 DiffuSAM trains a lightweight UNet-based diffusion prior conditioned on frozen SAM2 image encoder features and class labels to generate SAM2-compatible memory embeddings.
@@ -189,17 +183,37 @@ The SAM2 backbone remains entirely frozen; only the compact diffusion prior is t
 
 \vspace{0.08cm}
 \begin{center}
-\includegraphics[width=0.88\columnwidth]{pipeline_a_a.png}
+\includegraphics[width=0.90\columnwidth]{pipeline_a_cropped.png}
 \end{center}
-\vspace{2pt}
-{\small\textit{(a) DiffuSAM overview.} A diffusion prior (green) generates memory embeddings from SAM2 image encoder features, eliminating user prompts (red). All SAM2 components remain frozen.}
+\vspace{1pt}
+{\small\textit{DiffuSAM overview.} The diffusion prior generates SAM2-compatible memory embeddings from frozen image features, removing the prompt encoder from the adaptation path.}
 
-\vspace{0.08cm}
+\vspace{0.04cm}
 \begin{center}
-\includegraphics[width=0.64\columnwidth]{pipeline_b.png}
+\includegraphics[width=0.72\columnwidth]{pipeline_b_cropped.png}
 \end{center}
-\vspace{2pt}
-{\small\textit{(b) Diffusion prior model.} During training: takes noised memory embedding, image embedding, timestep, and class label, learns to denoise. At inference: generates memory from pure noise in 2 steps.}
+\vspace{1pt}
+{\small\textit{Diffusion prior training and sampling.} A UNet denoises memory embeddings conditioned on timestep, image embedding, and class label, then samples a predicted memory in two steps.}
+
+\vspace{1.5cm}
+{\small
+A simple \textbf{L2 loss} trains the \textbf{prior} to recover the clean memory embedding from a noised version conditioned on image features, timestep, and class label.
+We also add a \textbf{segmentation loss} on decoded masks from synthesized memory embeddings passed through frozen SAM2 memory attention and the mask decoder.
+\[
+\mathcal{L}_{\text{prior}}
+=
+\begin{aligned}[t]
+&\mathbb{E}_{t\sim[1,T],\, z_{\text{mem}}^{(t)}\sim q_t}
+\left\| f_{\theta}\!\left(z_{\text{mem}}^{(t)},\, t,\, z_{\text{img}},\, \mathbf{l}\right)
+- z_{\text{mem}} \right\|_2^2
+\end{aligned}
+\]
+\vspace{-3cm}
+\[
+\mathcal{L} = \lambda_{\text{prior}} \mathcal{L}_{\text{prior}} +
+\lambda_{\text{seg}} \mathcal{L}_{\text{seg}}
+\]
+}
 
 % ── RIGHT COLUMN ───────────────────────────────────────────────
 \columnbreak
@@ -287,38 +301,54 @@ Cross-slice volumetric conditioning improved average Dice by \textbf{4--5 percen
 \vspace{2pt}
 {\small\textit{t-SNE of generated vs.\ ground-truth SAM2 memory embeddings.} (A) Early training: diffuse, misaligned. (B) End of training: compact, aligned clusters.}
 
-\vspace{0.06cm}
+\vspace{0.5cm}
 \sectionbar{Discussion and Conclusion}
 
 DiffuSAM demonstrates that a compact diffusion prior over frozen foundation model features enables competitive prompt-free segmentation with minimal training resources.
 Current limitations include evaluation restricted to four abdominal organs across two datasets.
 Future work will extend to broader anatomical structures and integrate additional domain adaptation strategies to support clinical deployment.
 
-\vspace{0.08cm}
-\sectionbar{References}
+\vspace{0.5cm}
 {\footnotesize
-\begin{enumerate}[leftmargin=1.2em, itemsep=0pt, topsep=1pt]
+\colorbox{LightGray}{\parbox{\dimexpr\columnwidth-2\fboxsep}{%
+\vspace{3pt}
+\textbf{Keywords:}\enspace
+Medical image segmentation,\enspace diffusion models,\enspace SAM2,\enspace prompt-free segmentation,\enspace source-free domain adaptation
+\vspace{3pt}
+}}
+}
+\sectionbar{References}
+
+\vspace{0.12cm}
+{\footnotesize
+\begin{minipage}[t]{0.48\columnwidth}
+\begin{enumerate}[leftmargin=1.15em, itemsep=1pt, topsep=1pt]
 \item Kirillov A et al. \textit{arXiv} 2023;2304.02643.
 \item Ravi N et al. \textit{arXiv} 2024;2408.00714.
 \item Ma J et al. \textit{Nat Commun} 2024;15:654.
 \item Ronneberger O et al. \textit{MICCAI} 2015:234--241.
 \item Hatamizadeh A et al. \textit{WACV} 2022:574--584.
+\end{enumerate}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\columnwidth}
+\begin{enumerate}[leftmargin=1.15em, itemsep=1pt, topsep=1pt, start=6]
 \item He X et al. \textit{arXiv} 2025;2501.09138.
 \item Huai Z et al. \textit{IEEE TMI} 2025.
 \item Chen C et al. \textit{MICCAI} 2021:225--235.
 \item Landman B et al. \textit{MICCAI Workshop} 2015.
 \item Kavur AE et al. \textit{Med Image Anal} 2021;69:101950.
 \end{enumerate}
+\end{minipage}
 }
 
 \vspace{0.08cm}
 \begin{center}
 \IfFileExists{poster_qr.png}{%
-  \includegraphics[width=0.30\columnwidth]{poster_qr.png}
+  \includegraphics[width=0.36\columnwidth]{poster_qr.png}
 }{%
   \begin{tikzpicture}
     \node[draw=SectionBlue, dashed, line width=2.5pt,
-          rounded corners=6pt, minimum width=5.2cm, minimum height=5.2cm,
+          rounded corners=6pt, minimum width=5.8cm, minimum height=5.8cm,
           text=SectionBlue, font=\small\bfseries, align=center]
       {QR /\\barcode\\placeholder};
   \end{tikzpicture}
