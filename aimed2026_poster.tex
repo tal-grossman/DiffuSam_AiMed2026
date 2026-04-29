@@ -183,14 +183,14 @@ The SAM2 backbone remains entirely frozen; only the compact diffusion prior is t
 
 \vspace{0.08cm}
 \begin{center}
-\includegraphics[width=0.94\columnwidth]{pipeline_a_cropped.png}
+\includegraphics[width=0.90\columnwidth]{pipeline_a_cropped.png}
 \end{center}
 \vspace{1pt}
 {\small\textit{DiffuSAM overview.} The diffusion prior generates SAM2-compatible memory embeddings from frozen image features, removing the prompt encoder from the adaptation path.}
 
 \vspace{0.04cm}
 \begin{center}
-\includegraphics[width=0.76\columnwidth]{pipeline_b_cropped.png}
+\includegraphics[width=0.72\columnwidth]{pipeline_b_cropped.png}
 \end{center}
 \vspace{1pt}
 {\small\textit{Diffusion prior training and sampling.} A UNet denoises memory embeddings conditioned on timestep, image embedding, and class label, then samples a predicted memory in two steps.}
@@ -208,7 +208,7 @@ We also add a \textbf{segmentation loss} on decoded masks from synthesized memor
 - z_{\text{mem}} \right\|_2^2
 \end{aligned}
 \]
-% \vspace{-3cm}
+\vspace{-4cm}
 \[
 \mathcal{L} = \lambda_{\text{prior}} \mathcal{L}_{\text{prior}} +
 \lambda_{\text{seg}} \mathcal{L}_{\text{seg}}
@@ -250,7 +250,7 @@ DiffuSAM (w/o 3D) & 82.87 & 80.95 & 83.56 & 83.49 & 82.72 \\
 \end{tabular*}
 }
 
-\vspace{0.12cm}
+\vspace{0.04cm}
 
 {\small
 \captionsetup{font=small, labelfont=bf}
@@ -272,43 +272,36 @@ DiffuSAM (w/o 3D) & 76.30 & 85.80 & 85.20 & 74.30 & 80.40 \\
 \end{tabular*}
 }
 
-\vspace{6pt}
 Cross-slice volumetric conditioning improved average Dice by \textbf{4--5 percentage points} in both settings.
-
-\vspace{0.08cm}
 
 % Inference figures BEFORE t-SNE (per plan)
 \begin{center}
-\includegraphics[width=0.92\columnwidth]{inference_steps_patient_36_slice_32.png}\\[4pt]
-\includegraphics[width=0.92\columnwidth]{inference_steps_patient_IMG-0007-2_slice_10.png}
+\includegraphics[width=0.88\columnwidth]{inference_steps_patient_36_slice_32.png}\\[2pt]
+\includegraphics[width=0.88\columnwidth]{inference_steps_patient_IMG-0007-2_slice_10.png}
 \end{center}
-\vspace{2pt}
 {\small\textit{Progressive diffusion refinement.} Top: CT (BTCV). Bottom: MRI (CHAOS). Accurate segmentations emerge in only 2 diffusion steps.}
-
-\vspace{0.08cm}
 
 % t-SNE AFTER inference (per plan)
 \begin{center}
-\begin{minipage}[t]{0.44\columnwidth}\centering
+\begin{minipage}[t]{0.46\columnwidth}\centering
 \includegraphics[width=\linewidth]{tsne_combined_all_organs_perp3_epoch1.png}\\[2pt]
 {\small (A) Epoch 1}
 \end{minipage}\hfill
-\begin{minipage}[t]{0.44\columnwidth}\centering
+\begin{minipage}[t]{0.46\columnwidth}\centering
 \includegraphics[width=\linewidth]{tsne_combined_all_organs_perp3_epoch75.png}\\[2pt]
 {\small (B) Epoch 75}
 \end{minipage}
 \end{center}
-\vspace{2pt}
 {\small\textit{t-SNE of generated vs.\ ground-truth SAM2 memory embeddings.} (A) Early training: diffuse, misaligned. (B) End of training: compact, aligned clusters.}
 
-\vspace{0.5cm}
+\vspace{0.15cm}
 \sectionbar{Discussion and Conclusion}
 
 DiffuSAM demonstrates that a compact diffusion prior over frozen foundation model features enables competitive prompt-free segmentation with minimal training resources.
 Current limitations include evaluation restricted to four abdominal organs across two datasets.
 Future work will extend to broader anatomical structures and integrate additional domain adaptation strategies to support clinical deployment.
 
-\vspace{0.5cm}
+\vspace{0.15cm}
 {\footnotesize
 \colorbox{LightGray}{\parbox{\dimexpr\columnwidth-2\fboxsep}{%
 \vspace{3pt}
@@ -322,7 +315,7 @@ Medical image segmentation,\enspace diffusion models,\enspace SAM2,\enspace prom
 \vspace{0.12cm}
 {\small
 \begin{minipage}[t]{0.48\columnwidth}
-\begin{enumerate}[leftmargin=1.15em, itemsep=2pt, topsep=1pt]
+\begin{enumerate}[leftmargin=1.15em, itemsep=1pt, topsep=1pt]
 \item Kirillov A et al. \textit{arXiv} 2023;2304.02643.
 \item Ravi N et al. \textit{arXiv} 2024;2408.00714.
 \item Ma J et al. \textit{Nat Commun} 2024;15:654.
@@ -331,7 +324,7 @@ Medical image segmentation,\enspace diffusion models,\enspace SAM2,\enspace prom
 \end{enumerate}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.48\columnwidth}
-\begin{enumerate}[leftmargin=1.15em, itemsep=2pt, topsep=1pt, start=6]
+\begin{enumerate}[leftmargin=1.15em, itemsep=1pt, topsep=1pt, start=6]
 \item He X et al. \textit{arXiv} 2025;2501.09138.
 \item Huai Z et al. \textit{IEEE TMI} 2025.
 \item Chen C et al. \textit{MICCAI} 2021:225--235.
@@ -340,6 +333,10 @@ Medical image segmentation,\enspace diffusion models,\enspace SAM2,\enspace prom
 \end{enumerate}
 \end{minipage}
 }
+
+\begin{center}
+\includegraphics[width=0.22\columnwidth]{qrcode/qrcode_arxiv_diffusam.png}
+\end{center}
 
 \end{multicols}
 
